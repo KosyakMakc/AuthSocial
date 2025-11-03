@@ -16,6 +16,7 @@ import io.github.kosyakmakc.socialBridge.DatabasePlatform.DefaultTranslations.IT
 import io.github.kosyakmakc.socialBridge.IBridgeModule;
 import io.github.kosyakmakc.socialBridge.ISocialBridge;
 import io.github.kosyakmakc.socialBridge.SocialPlatforms.ISocialPlatform;
+import io.github.kosyakmakc.socialBridge.Utils.Version;
 
 import java.sql.SQLException;
 import java.util.Collection;
@@ -24,6 +25,16 @@ import java.util.List;
 
 public class AuthModule implements IBridgeModule {
     private static final String NAME = "AuthSocial";
+    public static final List<ISocialCommand> socialCommands = List.of(
+            new CommitLoginCommand(),
+            new LogoutLoginCommand()
+    );
+    public static final List<IMinecraftCommand> minecraftCommands = List.of(
+            new LoginCommand(),
+            new StatusCommand()
+    );
+    public static final List<ITranslationSource> translationSources = List.of(new English());
+    public static final Version SocialBridge_CompabilityVersion = new Version(0, 1, 0);
 
     private final HashMap<ISocialPlatform, ISocialPlatformHandler> socialHandlersMap;
 
@@ -51,15 +62,15 @@ public class AuthModule implements IBridgeModule {
 
         try {
             bridge.queryDatabase(ctx -> {
-                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), Association_telegram.class);
+                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), AuthSession.class);
                 var daoSession = ctx.registerTable(AuthSession.class);
-
-                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), Association_telegram.class);
-                var daoTg = ctx.registerTable(Association_telegram.class);
 
                 if (daoSession == null) {
                     throw new RuntimeException("Не удалось проинициализировать обязательную таблицу - " + AuthSession.class.getSimpleName());
                 }
+
+                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), Association_telegram.class);
+                var daoTg = ctx.registerTable(Association_telegram.class);
 
                 if (daoTg == null) {
                     throw new RuntimeException("Не удалось проинициализировать обязательную таблицу - " + Association_telegram.class.getSimpleName());
@@ -74,29 +85,23 @@ public class AuthModule implements IBridgeModule {
     }
 
     @Override
-    public Runtime.Version getCompabilityVersion() {
-        return Runtime.Version.parse("0.1.0");
+    public Version getCompabilityVersion() {
+        return SocialBridge_CompabilityVersion;
     }
 
     @Override
     public List<ISocialCommand> getSocialCommands() {
-        return List.of(
-                new CommitLoginCommand(),
-                new LogoutLoginCommand()
-        );
+        return socialCommands;
     }
 
     @Override
     public List<IMinecraftCommand> getMinecraftCommands() {
-        return List.of(
-                new LoginCommand(),
-                new StatusCommand()
-        );
+        return minecraftCommands;
     }
 
     @Override
     public List<ITranslationSource> getTranslations() {
-        return List.of(new English());
+        return translationSources;
     }
 
     @Override

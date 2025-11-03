@@ -51,7 +51,7 @@ public record TelegramHandler(ISocialBridge bridge) implements ISocialPlatformHa
             if (existedRows > 0) {
                 isDuplicate.set(true);
             } else {
-                var association = new Association_telegram(minecraftId, (int) tgUser.getId());
+                var association = new Association_telegram(minecraftId, (long) tgUser.getId());
                 databaseContext.getDaoTable(Association_telegram.class).create(association);
             }
 
