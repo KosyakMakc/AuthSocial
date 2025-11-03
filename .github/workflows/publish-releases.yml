@@ -6,7 +6,7 @@ on:
       - '*'
 
 jobs:
-  publish:
+  publish-release:
     name: Publish releases
     runs-on: ubuntu-latest
     permissions:
