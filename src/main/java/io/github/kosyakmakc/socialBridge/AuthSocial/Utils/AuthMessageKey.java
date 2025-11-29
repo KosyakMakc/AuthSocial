@@ -7,6 +7,7 @@ public class AuthMessageKey {
 
     public static final MessageKey LOGIN_FROM_MINECRAFT = new MessageKey("login_from_minecraft");
     public static final MessageKey COMMITED_LOGIN = new MessageKey("commited_login");
+    public static final MessageKey SOCIAL_COMMITED_LOGIN = new MessageKey("social_commited_login");
     public static final MessageKey YOU_ARE_ALREADY_AUTHORIZED = new MessageKey("you_are_already_authorized");
     public static final MessageKey COMMIT_LOGIN_FAILED = new MessageKey("commit_login_failed");
     public static final MessageKey LOGOUT_SUCCESS = new MessageKey("logout_success");

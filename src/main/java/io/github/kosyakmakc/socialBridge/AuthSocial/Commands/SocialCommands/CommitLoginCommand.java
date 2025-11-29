@@ -74,7 +74,8 @@ public class CommitLoginCommand extends SocialCommandBase {
             switch (resultState) {
                 case Commited -> {
                     logger.info(sender.getName() + " success commited login to " + sender.getPlatform().getPlatformName() + " platform");
-                    sender.sendMessage(getBridge().getLocalizationService().getMessage(sender.getLocale(), AuthMessageKey.COMMITED_LOGIN), placeholders);
+                    //mcPlayer.sendMessage(getBridge().getLocalizationService().getMessage(sender.getLocale(), AuthMessageKey.COMMITED_LOGIN), placeholders);
+                    sender.sendMessage(getBridge().getLocalizationService().getMessage(sender.getLocale(), AuthMessageKey.SOCIAL_COMMITED_LOGIN), placeholders);
                 }
                 case NotCommited -> {
                     logger.info(sender.getName() + " failed to commit login");
