@@ -26,7 +26,8 @@ public class English implements ITranslationSource {
 
                 // social formatted
                 new Localization(getLanguage(), AuthMessageKey.UNSUPPORTED_PLATFORM.key(), "Sorry, but this platform is unsupported."),
-                new Localization(getLanguage(), AuthMessageKey.YOU_ARE_ALREADY_AUTHORIZED.key(), "You are already authorized on <social-platform-name> platform."),
+                new Localization(getLanguage(), AuthMessageKey.SOCIAL_COMMITED_LOGIN.key(), "You are successfully connected."),
+                new Localization(getLanguage(), AuthMessageKey.YOU_ARE_ALREADY_AUTHORIZED.key(), "You are already authorized on this platform."),
                 new Localization(getLanguage(), AuthMessageKey.COMMIT_LOGIN_FAILED.key(), "Unable confirm authorization with this code."),
 
                 // shared text

@@ -32,7 +32,7 @@ repositories {
     }
 }
 dependencies {
-    compileOnly "io.github.kosyakmakc:social-bridge-telegram:0.2.0-3"
+    compileOnly "io.github.kosyakmakc:social-bridge-telegram:0.2.+"
 }
 ```
 
