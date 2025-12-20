@@ -49,6 +49,7 @@ public class StatusCommand extends MinecraftCommandBase {
                         placeholders.put("social-platform-name", handler.getPlatform().getPlatformName());
                         minecraftUser.sendMessage(getRecordTemplateTask.get(), placeholders);
                     }
+                    index++;
                 }
                 
                 if (!isAny) {
