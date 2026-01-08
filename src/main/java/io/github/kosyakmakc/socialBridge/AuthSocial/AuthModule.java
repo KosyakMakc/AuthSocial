@@ -39,7 +39,7 @@ import java.util.logging.Logger;
 
 public class AuthModule implements ISocialModule, IAuthModule {
     public static final UUID ID = UUID.fromString("11752e9b-8968-42ca-8513-6ce3e52a27b4");
-    public static final Version SocialBridge_CompabilityVersion = new Version(0, 5, 0);
+    public static final Version SocialBridge_CompabilityVersion = new Version("0.6.0");
     public static final String NAME = "authsocial";
     private Logger logger;
     private ISocialBridge bridge;
