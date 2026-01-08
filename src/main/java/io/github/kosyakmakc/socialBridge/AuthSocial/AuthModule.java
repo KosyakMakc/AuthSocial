@@ -91,6 +91,8 @@ public class AuthModule implements ISocialModule, IAuthModule {
                     var existedRows = dao
                     .queryBuilder()
                         .where()
+                        .eq(Association.SOCIAL_PLATFORM_ID_FIELD_NAME, socialUser.getPlatform().getId())
+                        .and()
                         .eq(Association.MINECRAFT_ID_FIELD_NAME, minecraftId)
                         .and()
                         .eq(Association.IS_DELETED_FIELD_NAME, false)
