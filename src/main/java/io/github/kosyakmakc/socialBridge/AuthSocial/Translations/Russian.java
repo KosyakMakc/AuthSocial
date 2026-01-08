@@ -21,7 +21,7 @@ public class Russian implements ITranslationSource {
 
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_DESCRIPTION.key(), "Получить список подключенных социальных сетей."),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_HEADER.key(), "Вы имеете активные сессии в:"),
-                new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_RECORD.key(), "- <social-platform-name>"),
+                new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_RECORD.key(), "- <social-platform-name>(<social-user-name>)"),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_EMPTY.key(), "Нет активных сессий."),
 
                 new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN_DESCRIPTION.key(), "Подключить ваш аккаунт к игровому профилю Minecraft. Пожалуйста также укажите 6-значный код авторизации."),

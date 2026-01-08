@@ -22,7 +22,7 @@ public class English implements ITranslationSource {
 
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_DESCRIPTION.key(), "Get list of connected yours social platforms."),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_HEADER.key(), "You have active social sessions in:"),
-                new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_RECORD.key(), "- <social-platform-name>"),
+                new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_RECORD.key(), "- <social-platform-name>(<social-user-name>)"),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_EMPTY.key(), "No any active session."),
 
                 new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN_DESCRIPTION.key(), "Connect your social account with minecraft. Please provide also 6-digit auth code."),

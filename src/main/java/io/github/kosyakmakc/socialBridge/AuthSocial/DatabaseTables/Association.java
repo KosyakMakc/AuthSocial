@@ -1,20 +1,17 @@
 package io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables;
 
 import com.j256.ormlite.field.DatabaseField;
-import com.j256.ormlite.table.DatabaseTable;
 import io.github.kosyakmakc.socialBridge.DatabasePlatform.Tables.IDatabaseTable;
 
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
-@DatabaseTable(tableName = Association_telegram.TABLE_NAME)
-public class Association_telegram implements IDatabaseTable {
-    public static final String TABLE_NAME = "association_telegram";
-
+public abstract class Association<T> implements IDatabaseTable {
     public static final String ID_FIELD_NAME = "id";
     public static final String MINECRAFT_ID_FIELD_NAME = "minecraft_id";
-    public static final String TELEGRAM_ID_FIELD_NAME = "telegram_id";
+    public static final String SOCIAL_PLATFORM_ID_FIELD_NAME = "social_platform_id";
+    public static final String SOCIAL_USER_ID_FIELD_NAME = "social_user_id";
     public static final String IS_DELETED_FIELD_NAME = "is_deleted";
     public static final String CREATED_AT_FIELD_NAME = "created_at";
 
@@ -24,8 +21,11 @@ public class Association_telegram implements IDatabaseTable {
     @DatabaseField(columnName = MINECRAFT_ID_FIELD_NAME, index = true)
     private UUID minecraftId;
 
-    @DatabaseField(columnName = TELEGRAM_ID_FIELD_NAME, index = true)
-    private long telegramId;
+    @DatabaseField(columnName = SOCIAL_PLATFORM_ID_FIELD_NAME, index = true)
+    private UUID socialPlatformId;
+
+    @DatabaseField(columnName = SOCIAL_USER_ID_FIELD_NAME, index = true)
+    private T socialUserId;
 
     @DatabaseField(columnName = IS_DELETED_FIELD_NAME, index = true)
     private boolean isDeleted;
@@ -33,13 +33,14 @@ public class Association_telegram implements IDatabaseTable {
     @DatabaseField(columnName = CREATED_AT_FIELD_NAME)
     private Date createdAt;
 
-    public Association_telegram() {
+    public Association() {
 
     }
 
-    public Association_telegram(UUID minecraftId, long telegramId) {
+    public Association(UUID minecraftId, UUID socialPlatformId, T socialUserId) {
         this.minecraftId = minecraftId;
-        this.telegramId = telegramId;
+        this.socialPlatformId = socialPlatformId;
+        this.socialUserId = socialUserId;
         this.isDeleted = false;
 
         var now = Instant.now();
@@ -50,8 +51,12 @@ public class Association_telegram implements IDatabaseTable {
         return this.minecraftId;
     }
 
-    public long getTelegramId() {
-        return telegramId;
+    public UUID getSocialPlatformId() {
+        return socialPlatformId;
+    }
+
+    public T getSocialUserId() {
+        return socialUserId;
     }
 
     public boolean isDeleted() {
