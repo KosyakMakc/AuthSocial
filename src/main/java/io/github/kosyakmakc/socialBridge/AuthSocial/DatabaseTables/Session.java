@@ -9,9 +9,9 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
-@DatabaseTable(tableName = AuthSession.TABLE_NAME)
-public class AuthSession implements IDatabaseTable {
-    public static final String TABLE_NAME = "auth_session";
+@DatabaseTable(tableName = Session.TABLE_NAME)
+public class Session implements IDatabaseTable {
+    public static final String TABLE_NAME = "authsocial_session";
 
     public static final String ID_FIELD_NAME = "id";
     public static final String MINECRAFT_ID_FIELD_NAME = "minecraft_id";
@@ -38,11 +38,11 @@ public class AuthSession implements IDatabaseTable {
     @DatabaseField(columnName = EXPIRED_AT_FIELD_NAME, index = true)
     private Date expiredAt;
 
-    public AuthSession() {
+    public Session() {
 
     }
 
-    public AuthSession(UUID minecraftId, int authCode, Duration expiration) {
+    public Session(UUID minecraftId, int authCode, Duration expiration) {
         this.minecraftId = minecraftId;
         this.authCode = authCode;
         var now = Instant.now();

@@ -1,7 +1,7 @@
 package io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands;
 
 import io.github.kosyakmakc.socialBridge.AuthSocial.AuthModule;
-import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.AuthSession;
+import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.Session;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthMessageKey;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthPermissions;
 import io.github.kosyakmakc.socialBridge.Commands.MinecraftCommands.MinecraftCommandBase;
@@ -34,10 +34,10 @@ public class LoginCommand extends MinecraftCommandBase {
         var placeholders = new HashMap<String, String>();
         placeholders.put("placeholder-code", Integer.toString(code));
 
-        var sessionDbRecord = new AuthSession(sender.getId(), code, Duration.ofMinutes(10));
+        var sessionDbRecord = new Session(sender.getId(), code, Duration.ofMinutes(10));
         bridge.queryDatabase(databaseContext -> {
             try {
-                databaseContext.getDaoTable(AuthSession.class).create(sessionDbRecord);
+                databaseContext.getDaoTable(Session.class).create(sessionDbRecord);
                 return true;
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, "failed save auth session to database", e);

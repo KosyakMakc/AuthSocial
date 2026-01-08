@@ -1,7 +1,7 @@
 package io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands;
 
 import io.github.kosyakmakc.socialBridge.AuthSocial.AuthModule;
-import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.AuthSession;
+import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.Session;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthMessageKey;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.LoginState;
 import io.github.kosyakmakc.socialBridge.Commands.Arguments.CommandArgument;
@@ -37,14 +37,14 @@ public class CommitLoginCommand extends SocialCommandBase {
 
         bridge.queryDatabase(database -> {
             try {
-                var availableSessions = database.getDaoTable(AuthSession.class).queryBuilder()
-                        .orderBy(AuthSession.EXPIRED_AT_FIELD_NAME, true)
+                var availableSessions = database.getDaoTable(Session.class).queryBuilder()
+                        .orderBy(Session.EXPIRED_AT_FIELD_NAME, true)
                         .where()
-                        .eq(AuthSession.AUTH_CODE_FIELD_NAME, authCode)
+                        .eq(Session.AUTH_CODE_FIELD_NAME, authCode)
                         .and()
-                        .eq(AuthSession.IS_SPENT_FIELD_NAME, false)
+                        .eq(Session.IS_SPENT_FIELD_NAME, false)
                         .and()
-                        .gt(AuthSession.EXPIRED_AT_FIELD_NAME, Date.from(Instant.now()))
+                        .gt(Session.EXPIRED_AT_FIELD_NAME, Date.from(Instant.now()))
                         .query();
 
                 if (availableSessions.isEmpty()) {
@@ -54,7 +54,7 @@ public class CommitLoginCommand extends SocialCommandBase {
                 var session = availableSessions.getFirst();
 
                 session.spend();
-                database.getDaoTable(AuthSession.class).update(session);
+                database.getDaoTable(Session.class).update(session);
 
                 return session.getMinecraftId();
             }
@@ -65,7 +65,7 @@ public class CommitLoginCommand extends SocialCommandBase {
         })
         .thenCompose(minecraftId -> {
             if (minecraftId != null) {
-                return module.Authorize(sender, minecraftId);
+                return module.authorize(sender, minecraftId);
             }
             else {
                 return CompletableFuture.completedFuture(LoginState.NotCommited);

@@ -8,7 +8,6 @@ import io.github.kosyakmakc.socialBridge.MinecraftPlatform.MinecraftUser;
 import io.github.kosyakmakc.socialBridge.Utils.MessageKey;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -28,30 +27,27 @@ public class StatusCommand extends MinecraftCommandBase {
         var getHeaderTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_HEADER);
         var getRecordTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_RECORD);
         var getEmptyTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_EMPTY);
+        var socialUsersTask = module.tryGetSocialUsers(minecraftUser.getId());
 
-        var handlersCopy = module.getSocialHandlers().stream().toList();
-        @SuppressWarnings({ "rawtypes", "unchecked" })
-        LinkedList<CompletableFuture> tasks = new LinkedList(handlersCopy.stream().map(x -> (CompletableFuture) x.isAuthorized(minecraftUser)).toList());
-        tasks.add(getHeaderTemplateTask);
-        tasks.add(getRecordTemplateTask);
-        tasks.add(getEmptyTemplateTask);
-
-        CompletableFuture.allOf(tasks.toArray(CompletableFuture[]::new))
+        CompletableFuture.allOf(new CompletableFuture[] {
+            socialUsersTask,
+            getHeaderTemplateTask,
+            getRecordTemplateTask,
+            getEmptyTemplateTask
+        })
         .thenRun(() -> {
             try {
                 minecraftUser.sendMessage(getHeaderTemplateTask.get(), new HashMap<>());
-                var isAny = false;
-                var index = 0;
-                for (var handler : handlersCopy) {
-                    if ((boolean) tasks.get(index).get()) {
-                        isAny = true;
-                        var placeholders = new HashMap<String, String>();
-                        placeholders.put("social-platform-name", handler.getPlatform().getPlatformName());
-                        minecraftUser.sendMessage(getRecordTemplateTask.get(), placeholders);
-                    }
-                    index++;
+                var users = socialUsersTask.get();
+                var isAny = !users.isEmpty();
+
+                for (var user : users) {
+                    var placeholders = new HashMap<String, String>();
+                    placeholders.put("social-platform-name", user.getPlatform().getPlatformName());
+                    placeholders.put("social-user-name", user.getName());
+                    minecraftUser.sendMessage(getRecordTemplateTask.get(), placeholders);
                 }
-                
+
                 if (!isAny) {
                     minecraftUser.sendMessage(getEmptyTemplateTask.get(), new HashMap<>());
                 }

@@ -11,15 +11,15 @@
 
 | Command literal    | Permission node   | Description                                                              |
 |--------------------|-------------------|--------------------------------------------------------------------------|
-| /auth login        | AuthSocial.login  | Creates a short-life session for auth with 6-digit code                  |
-| /auth status       | AuthSocial.status | Provide information about all connected social platform for user(sender) |
+| /authsocial login        | AuthSocial.login  | Creates a short-life session for auth with 6-digit code                  |
+| /authsocial status       | AuthSocial.status | Provide information about all connected social platform for user(sender) |
 
 ### Commands for social platforms:
 
 | Command literal             | Description                                                                                      |
 |-----------------------------|--------------------------------------------------------------------------------------------------|
-| /auth_login   auth-code     | Authorize social user with minecraft player using AUTH_CODE, authorize will be saved to database |
-| /auth_logout                | Drop authorize with minecraft player from database                                               |
+| /authsocial_login   auth-code     | Authorize social user with minecraft player using AUTH_CODE, authorize will be saved to database |
+| /authsocial_logout                | Drop authorize with minecraft player from database                                               |
 
 ## API for developers
 
@@ -32,8 +32,8 @@ repositories {
     }
 }
 dependencies {
-    compileOnly "io.github.kosyakmakc:AuthSocial:0.5.1"
+    compileOnly "io.github.kosyakmakc:AuthSocial:0.6.+"
 }
 ```
 
-### via `ISocialBridge.getModule(AuthModule.class)` you can access this module and enumerate platform handlers `AuthModule.getSocialHandlers()`, where you can interview every supported platform to get\check authorization
+### via `ISocialBridge.getModule(AuthModule.class)` you can access this module and use AuthSocial API
