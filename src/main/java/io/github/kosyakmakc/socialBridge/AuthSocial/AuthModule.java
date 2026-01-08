@@ -126,7 +126,6 @@ public class AuthModule implements ISocialModule, IAuthModule {
     @Override
     public CompletableFuture<List<SocialUser>> tryGetSocialUsers(UUID minecraftId) {
         return bridge.queryDatabase(databaseContext -> {
-            @SuppressWarnings("rawtypes")
             var associations = new LinkedList<Association>();
             try {
                 for (var type : IdentifierType.values()) {
@@ -134,8 +133,8 @@ public class AuthModule implements ISocialModule, IAuthModule {
                     if (associationType == null) {
                         continue;
                     }
-                    
-                    @SuppressWarnings({ "rawtypes", "unchecked" })
+
+                    @SuppressWarnings("unchecked")
                     var dao = (Dao<Association, Object>) databaseContext.getDaoTable(associationType);
                     var query = dao
                         .queryBuilder()
@@ -187,7 +186,7 @@ public class AuthModule implements ISocialModule, IAuthModule {
                     return null;
                 }
 
-                @SuppressWarnings({ "rawtypes", "unchecked" })
+                @SuppressWarnings("unchecked")
                 var dao = (Dao<Association, Object>) databaseContext.getDaoTable(associationType);
 
                 var association = dao
@@ -230,7 +229,7 @@ public class AuthModule implements ISocialModule, IAuthModule {
                         return null;
                     }
 
-                    @SuppressWarnings({ "rawtypes", "unchecked" })
+                    @SuppressWarnings("unchecked")
                     var dao = (Dao<Association, Object>) databaseContext.getDaoTable(associationType);
 
                     var association = dao
@@ -373,7 +372,6 @@ public class AuthModule implements ISocialModule, IAuthModule {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     private Association createAssociation(SocialUser socialUser, UUID minecraftId) {
         var socialPlatformId = socialUser.getPlatform().getId();
         var identifier = socialUser.getId();

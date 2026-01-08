@@ -7,7 +7,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
 
-public abstract class Association<T> implements IDatabaseTable {
+public abstract class Association implements IDatabaseTable {
     public static final String ID_FIELD_NAME = "id";
     public static final String MINECRAFT_ID_FIELD_NAME = "minecraft_id";
     public static final String SOCIAL_PLATFORM_ID_FIELD_NAME = "social_platform_id";
@@ -24,9 +24,6 @@ public abstract class Association<T> implements IDatabaseTable {
     @DatabaseField(columnName = SOCIAL_PLATFORM_ID_FIELD_NAME, index = true)
     private UUID socialPlatformId;
 
-    @DatabaseField(columnName = SOCIAL_USER_ID_FIELD_NAME, index = true)
-    private T socialUserId;
-
     @DatabaseField(columnName = IS_DELETED_FIELD_NAME, index = true)
     private boolean isDeleted;
 
@@ -37,10 +34,9 @@ public abstract class Association<T> implements IDatabaseTable {
 
     }
 
-    public Association(UUID minecraftId, UUID socialPlatformId, T socialUserId) {
+    public Association(UUID minecraftId, UUID socialPlatformId) {
         this.minecraftId = minecraftId;
         this.socialPlatformId = socialPlatformId;
-        this.socialUserId = socialUserId;
         this.isDeleted = false;
 
         var now = Instant.now();
@@ -55,9 +51,7 @@ public abstract class Association<T> implements IDatabaseTable {
         return socialPlatformId;
     }
 
-    public T getSocialUserId() {
-        return socialUserId;
-    }
+    public abstract Object getSocialUserId();
 
     public boolean isDeleted() {
         return isDeleted;
