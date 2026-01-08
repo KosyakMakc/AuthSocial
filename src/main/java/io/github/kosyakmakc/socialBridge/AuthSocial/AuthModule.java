@@ -303,6 +303,12 @@ public class AuthModule implements ISocialModule, IAuthModule {
                     throw new RuntimeException("Failed to create required database table - " + AssociationByUUID.class.getSimpleName());
                 }
 
+                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), AssociationByString.class);
+                var daoAssociationByString = ctx.registerTable(AssociationByString.class);
+                if (daoAssociationByString == null) {
+                    throw new RuntimeException("Failed to create required database table - " + AssociationByString.class.getSimpleName());
+                }
+
                 return true;
             } catch (SQLException e) {
                 throw new RuntimeException(e);
