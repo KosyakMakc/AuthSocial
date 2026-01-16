@@ -371,7 +371,6 @@ public class AuthModule implements ISocialModule, IAuthModule {
     private <T> CompletableFuture<Void> iterateCursor(Iterator<T> cursor, Function<T, CompletableFuture<Void>> handler) {
         if (cursor.hasNext()) {
             var item = cursor.next();
-            Thread.ye
 
             return handler
                 .apply(item)
