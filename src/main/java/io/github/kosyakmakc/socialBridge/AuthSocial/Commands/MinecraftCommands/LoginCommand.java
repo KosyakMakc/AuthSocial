@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
 public class LoginCommand extends MinecraftCommandBase {
@@ -35,13 +36,15 @@ public class LoginCommand extends MinecraftCommandBase {
         placeholders.put("placeholder-code", Integer.toString(code));
 
         var sessionDbRecord = new Session(sender.getId(), code, Duration.ofMinutes(10));
-        bridge.queryDatabase(databaseContext -> {
+        bridge.queryDatabase(transaction -> {
+            var databaseContext = transaction.getDatabaseContext();
+
             try {
                 databaseContext.getDaoTable(Session.class).create(sessionDbRecord);
-                return true;
+                return CompletableFuture.completedFuture(true);
             } catch (SQLException e) {
                 logger.log(Level.SEVERE, "failed save auth session to database", e);
-                return false;
+                return CompletableFuture.completedFuture(false);
             }
         })
         .thenCompose(isSuccess -> {
