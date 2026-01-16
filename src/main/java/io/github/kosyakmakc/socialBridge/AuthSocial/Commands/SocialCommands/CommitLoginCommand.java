@@ -35,9 +35,11 @@ public class CommitLoginCommand extends SocialCommandBase {
         var authCode = (int) args.getFirst();
         var placeholders = new HashMap<String, String>();
 
-        bridge.queryDatabase(database -> {
+        bridge.queryDatabase(transaction -> {
+            var databaseContext = transaction.getDatabaseContext();
+
             try {
-                var availableSessions = database.getDaoTable(Session.class).queryBuilder()
+                var availableSessions = databaseContext.getDaoTable(Session.class).queryBuilder()
                         .orderBy(Session.EXPIRED_AT_FIELD_NAME, true)
                         .where()
                         .eq(Session.AUTH_CODE_FIELD_NAME, authCode)
@@ -48,19 +50,19 @@ public class CommitLoginCommand extends SocialCommandBase {
                         .query();
 
                 if (availableSessions.isEmpty()) {
-                    return null;
+                    return CompletableFuture.completedFuture(null);
                 }
 
                 var session = availableSessions.getFirst();
 
                 session.spend();
-                database.getDaoTable(Session.class).update(session);
+                databaseContext.getDaoTable(Session.class).update(session);
 
-                return session.getMinecraftId();
+                return CompletableFuture.completedFuture(session.getMinecraftId());
             }
             catch (SQLException e) {
                 logger.log(Level.SEVERE, "failed to commit login", e);
-                return null;
+                return CompletableFuture.completedFuture(null);
             }
         })
         .thenCompose(minecraftId -> {

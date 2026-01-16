@@ -22,6 +22,7 @@ import io.github.kosyakmakc.socialBridge.MinecraftPlatform.IModuleLoader;
 import io.github.kosyakmakc.socialBridge.MinecraftPlatform.MinecraftUser;
 import io.github.kosyakmakc.socialBridge.ISocialBridge;
 import io.github.kosyakmakc.socialBridge.ISocialModule;
+import io.github.kosyakmakc.socialBridge.ITransaction;
 import io.github.kosyakmakc.socialBridge.SocialPlatforms.Identifier;
 import io.github.kosyakmakc.socialBridge.SocialPlatforms.IdentifierType;
 import io.github.kosyakmakc.socialBridge.SocialPlatforms.SocialUser;
@@ -29,17 +30,20 @@ import io.github.kosyakmakc.socialBridge.Utils.Version;
 
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class AuthModule implements ISocialModule, IAuthModule {
     public static final UUID ID = UUID.fromString("11752e9b-8968-42ca-8513-6ce3e52a27b4");
-    public static final Version SocialBridge_CompabilityVersion = new Version("0.6.0");
+    public static final Version SocialBridge_CompabilityVersion = new Version("0.8.1");
     public static final String NAME = "authsocial";
     private Logger logger;
     private ISocialBridge bridge;
@@ -77,18 +81,24 @@ public class AuthModule implements ISocialModule, IAuthModule {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public CompletableFuture<LoginState> authorize(SocialUser socialUser, UUID minecraftId) {
-        return bridge
-            .queryDatabase(databaseContext -> {
-                try {
-                    var associationType = getClassByType(socialUser.getId().type());
-                    if (associationType == null) {
-                        return LoginState.NotSupportedPlatform;
-                    }
+        return bridge.queryDatabase(transaction -> authorize(socialUser, minecraftId, transaction));
+    }
 
-                    var dao = databaseContext.getDaoTable(associationType);
-                    var existedRows = dao
+    @Override
+    @SuppressWarnings("unchecked")
+    public CompletableFuture<LoginState> authorize(SocialUser socialUser, UUID minecraftId, ITransaction transaction) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                var databaseContext = transaction.getDatabaseContext();
+
+                var associationType = getClassByType(socialUser.getId().type());
+                if (associationType == null) {
+                    return LoginState.NotSupportedPlatform;
+                }
+
+                var dao = databaseContext.getDaoTable(associationType);
+                var existedRows = dao
                     .queryBuilder()
                         .where()
                         .eq(Association.SOCIAL_PLATFORM_ID_FIELD_NAME, socialUser.getPlatform().getId())
@@ -97,35 +107,42 @@ public class AuthModule implements ISocialModule, IAuthModule {
                         .and()
                         .eq(Association.IS_DELETED_FIELD_NAME, false)
                         .countOf();
-                        
-                    if (existedRows > 0) {
-                        return LoginState.DuplicationError;
-                    } else {
-                        var association = createAssociation(socialUser, minecraftId);
-                        dao.create(association);
-                    }
                     
-                    return LoginState.Commited;
-                }
-                catch (SQLException err) {
-                    err.printStackTrace();
-                    return LoginState.NotCommited;
-                }
-            })
-            .thenCompose(loginState -> {
-                if (loginState == LoginState.Commited) {
-                    return events.login
-                        .invoke(new LoginEvent(socialUser, minecraftId))
-                        .thenApply(Void -> loginState);
+                if (existedRows > 0) {
+                    return LoginState.DuplicationError;
+                } else {
+                    var association = createAssociation(socialUser, minecraftId);
+                    dao.create(association);
                 }
                 
-                return CompletableFuture.completedFuture(loginState);
-            });
+                return LoginState.Commited;
+            }
+            catch (SQLException err) {
+                err.printStackTrace();
+                return LoginState.NotCommited;
+            }
+        })
+        .thenCompose(loginState -> {
+            if (loginState == LoginState.Commited) {
+                return events.login
+                    .invoke(new LoginEvent(socialUser, minecraftId))
+                    .thenApply(Void -> loginState);
+            }
+            
+            return CompletableFuture.completedFuture(loginState);
+        });
     }
 
     @Override
     public CompletableFuture<List<SocialUser>> tryGetSocialUsers(UUID minecraftId) {
-        return bridge.queryDatabase(databaseContext -> {
+        return bridge.queryDatabase(transaction -> tryGetSocialUsers(minecraftId, transaction));
+    }
+
+    @Override
+    public CompletableFuture<List<SocialUser>> tryGetSocialUsers(UUID minecraftId, ITransaction transaction) {
+        return CompletableFuture.supplyAsync(() -> {
+            var databaseContext = transaction.getDatabaseContext();
+
             var associations = new LinkedList<Association>();
             try {
                 for (var type : IdentifierType.values()) {
@@ -161,7 +178,7 @@ public class AuthModule implements ISocialModule, IAuthModule {
                 .stream()
                 .map(association -> {
                     var socialPlatform = bridge.getSocialPlatform(association.getSocialPlatformId());
-                    return socialPlatform.tryGetUser(new Identifier(null, association.getSocialUserId()));
+                    return socialPlatform.tryGetUser(new Identifier(null, association.getSocialUserId()), transaction);
                 })
                 .toArray(CompletableFuture[]::new);
             return CompletableFuture.allOf(tasks).thenApply(Void -> tasks);
@@ -179,7 +196,14 @@ public class AuthModule implements ISocialModule, IAuthModule {
 
     @Override
     public CompletableFuture<MinecraftUser> tryGetMinecraftUser(SocialUser socialUser) {
-        return bridge.queryDatabase(databaseContext -> {
+        return bridge.queryDatabase(transaction -> tryGetMinecraftUser(socialUser, transaction));
+    }
+
+    @Override
+    public CompletableFuture<MinecraftUser> tryGetMinecraftUser(SocialUser socialUser, ITransaction transaction) {
+        return CompletableFuture.supplyAsync(() -> {
+            var databaseContext = transaction.getDatabaseContext();
+
             try {
                 var associationType = getClassByType(socialUser.getId().type());
                 if (associationType == null) {
@@ -221,8 +245,14 @@ public class AuthModule implements ISocialModule, IAuthModule {
 
     @Override
     public CompletableFuture<MinecraftUser> logoutUser(SocialUser socialUser) {
-        return bridge
-            .queryDatabase(databaseContext -> {
+        return bridge.queryDatabase(transaction -> logoutUser(socialUser, transaction));
+    }
+
+    @Override
+    public CompletableFuture<MinecraftUser> logoutUser(SocialUser socialUser, ITransaction transaction) {
+        return CompletableFuture.supplyAsync(() -> {
+                var databaseContext = transaction.getDatabaseContext();
+
                 try {
                     var associationType = getClassByType(socialUser.getId().type());
                     if (associationType == null) {
@@ -266,6 +296,91 @@ public class AuthModule implements ISocialModule, IAuthModule {
             });
     }
 
+    @Override
+    public CompletableFuture<Void> enumerateAssociations(Consumer<SocialUser> handler) {
+        return bridge.queryDatabase(transaction -> enumerateAssociations(handler, transaction));
+    }
+
+    @Override
+    public CompletableFuture<Void> enumerateAssociations(Consumer<SocialUser> handler, ITransaction transaction) {
+        return enumerateAssociations(socialUser -> {
+            handler.accept(socialUser);
+            return CompletableFuture.completedFuture(null);
+        }, transaction);
+    }
+
+    @Override
+    public CompletableFuture<Void> enumerateAssociations(Function<SocialUser, CompletableFuture<Void>> handler) {
+        return bridge.queryDatabase(transaction -> enumerateAssociations(handler, transaction));
+    }
+
+    @Override
+    public CompletableFuture<Void> enumerateAssociations(Function<SocialUser, CompletableFuture<Void>> handler, ITransaction transaction) {
+        var databaseContext = transaction.getDatabaseContext();
+
+        try {
+            return iterateCursor(Arrays.stream(IdentifierType.values()).iterator(), type -> {
+                var associationType = getClassByType(type);
+                if (associationType == null) {
+                    return CompletableFuture.completedFuture(null);
+                }
+
+                @SuppressWarnings("unchecked")
+                var dao = (Dao<Association, Object>) databaseContext.getDaoTable(associationType);
+
+                try {
+                    var query = dao
+                        .queryBuilder()
+                        .where()
+                        .eq(Association.IS_DELETED_FIELD_NAME, false);
+
+                    try (var cursor = query.iterator()) {
+                        return iterateCursor(cursor, association -> {
+                            var platform = bridge.getSocialPlatform(association.getSocialPlatformId());
+                            if (platform != null) {
+                                return platform
+                                    .tryGetUser(new Identifier(type, association.getSocialUserId()), transaction)
+                                    .thenCompose(socialUser -> {
+                                        if (socialUser != null) {
+                                            return handler.apply(socialUser);
+                                        }
+                                        return CompletableFuture.completedFuture(null);
+                                    });
+                            }
+                            else {
+                                return CompletableFuture.completedFuture(null);
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        return CompletableFuture.completedFuture(null);
+                    }
+                }
+                catch (SQLException e) {
+                    e.printStackTrace();
+                    return CompletableFuture.completedFuture(null);
+                }
+            });
+        }
+        catch (Exception err) {
+            err.printStackTrace();
+            return CompletableFuture.completedFuture(null);
+        }
+    }
+
+    private <T> CompletableFuture<Void> iterateCursor(Iterator<T> cursor, Function<T, CompletableFuture<Void>> handler) {
+        if (cursor.hasNext()) {
+            var item = cursor.next();
+            Thread.ye
+
+            return handler
+                .apply(item)
+                .thenCompose(Void -> iterateCursor(cursor, handler));
+        }
+
+        return CompletableFuture.completedFuture(null);
+    }
+
     public Logger getLogger() {
         return logger;
     }
@@ -275,40 +390,42 @@ public class AuthModule implements ISocialModule, IAuthModule {
         logger = Logger.getLogger(bridge.getLogger().getName() + '.' + NAME);
         this.bridge = bridge;
 
-        return bridge.queryDatabase(ctx -> {
+        return bridge.queryDatabase(transaction -> {
+            var databaseContext = transaction.getDatabaseContext();
+
             try {
-                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), Session.class);
-                var daoSession = ctx.registerTable(Session.class);
+                TableUtils.createTableIfNotExists(databaseContext.getConnectionSource(), Session.class);
+                var daoSession = databaseContext.registerTable(Session.class);
 
                 if (daoSession == null) {
                     throw new RuntimeException("Failed to create required database table - " + Session.class.getSimpleName());
                 }
 
-                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), AssociationByInteger.class);
-                var daoAssociationByInteger = ctx.registerTable(AssociationByInteger.class);
+                TableUtils.createTableIfNotExists(databaseContext.getConnectionSource(), AssociationByInteger.class);
+                var daoAssociationByInteger = databaseContext.registerTable(AssociationByInteger.class);
                 if (daoAssociationByInteger == null) {
                     throw new RuntimeException("Failed to create required database table - " + AssociationByInteger.class.getSimpleName());
                 }
 
-                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), AssociationByLong.class);
-                var daoAssociationByLong = ctx.registerTable(AssociationByLong.class);
+                TableUtils.createTableIfNotExists(databaseContext.getConnectionSource(), AssociationByLong.class);
+                var daoAssociationByLong = databaseContext.registerTable(AssociationByLong.class);
                 if (daoAssociationByLong == null) {
                     throw new RuntimeException("Failed to create required database table - " + AssociationByLong.class.getSimpleName());
                 }
 
-                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), AssociationByUUID.class);
-                var daoAssociationByGuid = ctx.registerTable(AssociationByUUID.class);
+                TableUtils.createTableIfNotExists(databaseContext.getConnectionSource(), AssociationByUUID.class);
+                var daoAssociationByGuid = databaseContext.registerTable(AssociationByUUID.class);
                 if (daoAssociationByGuid == null) {
                     throw new RuntimeException("Failed to create required database table - " + AssociationByUUID.class.getSimpleName());
                 }
 
-                TableUtils.createTableIfNotExists(ctx.getConnectionSource(), AssociationByString.class);
-                var daoAssociationByString = ctx.registerTable(AssociationByString.class);
+                TableUtils.createTableIfNotExists(databaseContext.getConnectionSource(), AssociationByString.class);
+                var daoAssociationByString = databaseContext.registerTable(AssociationByString.class);
                 if (daoAssociationByString == null) {
                     throw new RuntimeException("Failed to create required database table - " + AssociationByString.class.getSimpleName());
                 }
 
-                return true;
+                return CompletableFuture.completedFuture(true);
             } catch (SQLException e) {
                 throw new RuntimeException(e);
             }
