@@ -15,13 +15,10 @@ import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.Session;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Translations.English;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Translations.Russian;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.LoginState;
-import io.github.kosyakmakc.socialBridge.Commands.MinecraftCommands.IMinecraftCommand;
-import io.github.kosyakmakc.socialBridge.Commands.SocialCommands.ISocialCommand;
-import io.github.kosyakmakc.socialBridge.DatabasePlatform.DefaultTranslations.ITranslationSource;
 import io.github.kosyakmakc.socialBridge.MinecraftPlatform.IModuleLoader;
 import io.github.kosyakmakc.socialBridge.MinecraftPlatform.MinecraftUser;
+import io.github.kosyakmakc.socialBridge.Modules.SocialModule;
 import io.github.kosyakmakc.socialBridge.ISocialBridge;
-import io.github.kosyakmakc.socialBridge.ISocialModule;
 import io.github.kosyakmakc.socialBridge.ITransaction;
 import io.github.kosyakmakc.socialBridge.SocialPlatforms.Identifier;
 import io.github.kosyakmakc.socialBridge.SocialPlatforms.IdentifierType;
@@ -41,53 +38,36 @@ import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class AuthModule implements ISocialModule, IAuthModule {
+public class AuthModule extends SocialModule implements IAuthModule {
     public static final UUID ID = UUID.fromString("11752e9b-8968-42ca-8513-6ce3e52a27b4");
-    public static final Version SocialBridge_CompabilityVersion = new Version("0.8.1");
+    public static final Version SocialBridge_CompabilityVersion = new Version("0.9.1");
     public static final String NAME = "authsocial";
     private Logger logger;
-    private ISocialBridge bridge;
 
-    private final IModuleLoader loader;
     public final AuthEvents events = new AuthEvents();
 
-    public final List<ISocialCommand> socialCommands = List.of(
-            new CommitLoginCommand(this),
-            new LogoutLoginCommand(this)
-    );
-
-    public final List<IMinecraftCommand> minecraftCommands = List.of(
-            new LoginCommand(this),
-            new StatusCommand(this)
-    );
-
-    public final List<ITranslationSource> translationSources = List.of(
-            new English(),
-            new Russian()
-    );
-
     public AuthModule(IModuleLoader loader) {
-        this.loader = loader;
+        super(loader, SocialBridge_CompabilityVersion, ID, NAME);
+
+        addMinecraftCommand(new LoginCommand(this));
+        addMinecraftCommand(new StatusCommand(this));
+
+        addSocialCommand(new CommitLoginCommand(this));
+        addSocialCommand(new LogoutLoginCommand(this));
+
+        addTranslationSource(new English());
+        addTranslationSource(new Russian());
     }
 
     @Override
-    public UUID getId() {
-        return ID;
-    }
-
-    @Override
-    public IModuleLoader getLoader() {
-        return loader;
-    }
-
-    @Override
-    public CompletableFuture<LoginState> authorize(SocialUser socialUser, UUID minecraftId) {
-        return bridge.queryDatabase(transaction -> authorize(socialUser, minecraftId, transaction));
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
     public CompletableFuture<LoginState> authorize(SocialUser socialUser, UUID minecraftId, ITransaction transaction) {
+        return transaction == null
+            ? getBridge().doTransaction(transaction2 -> authorizeInternal(socialUser, minecraftId, transaction2))
+            : authorizeInternal(socialUser, minecraftId, transaction);
+    }
+
+    @SuppressWarnings("unchecked")
+    private CompletableFuture<LoginState> authorizeInternal(SocialUser socialUser, UUID minecraftId, ITransaction transaction) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 var databaseContext = transaction.getDatabaseContext();
@@ -134,12 +114,13 @@ public class AuthModule implements ISocialModule, IAuthModule {
     }
 
     @Override
-    public CompletableFuture<List<SocialUser>> tryGetSocialUsers(UUID minecraftId) {
-        return bridge.queryDatabase(transaction -> tryGetSocialUsers(minecraftId, transaction));
+    public CompletableFuture<List<SocialUser>> tryGetSocialUsers(UUID minecraftId, ITransaction transaction) {
+        return transaction == null
+            ? getBridge().doTransaction(transaction2 -> tryGetSocialUsersInternal(minecraftId, transaction2))
+            : tryGetSocialUsersInternal(minecraftId, transaction);
     }
 
-    @Override
-    public CompletableFuture<List<SocialUser>> tryGetSocialUsers(UUID minecraftId, ITransaction transaction) {
+    private CompletableFuture<List<SocialUser>> tryGetSocialUsersInternal(UUID minecraftId, ITransaction transaction) {
         return CompletableFuture.supplyAsync(() -> {
             var databaseContext = transaction.getDatabaseContext();
 
@@ -177,7 +158,7 @@ public class AuthModule implements ISocialModule, IAuthModule {
             var tasks = associasions
                 .stream()
                 .map(association -> {
-                    var socialPlatform = bridge.getSocialPlatform(association.getSocialPlatformId());
+                    var socialPlatform = getBridge().getSocialPlatform(association.getSocialPlatformId());
                     return socialPlatform.tryGetUser(new Identifier(null, association.getSocialUserId()), transaction);
                 })
                 .toArray(CompletableFuture[]::new);
@@ -195,12 +176,13 @@ public class AuthModule implements ISocialModule, IAuthModule {
     }
 
     @Override
-    public CompletableFuture<MinecraftUser> tryGetMinecraftUser(SocialUser socialUser) {
-        return bridge.queryDatabase(transaction -> tryGetMinecraftUser(socialUser, transaction));
+    public CompletableFuture<MinecraftUser> tryGetMinecraftUser(SocialUser socialUser, ITransaction transaction) {
+        return transaction == null
+            ? getBridge().doTransaction(transaction2 -> tryGetMinecraftUserInternal(socialUser, transaction2))
+            : tryGetMinecraftUserInternal(socialUser, transaction);
     }
 
-    @Override
-    public CompletableFuture<MinecraftUser> tryGetMinecraftUser(SocialUser socialUser, ITransaction transaction) {
+    private CompletableFuture<MinecraftUser> tryGetMinecraftUserInternal(SocialUser socialUser, ITransaction transaction) {
         return CompletableFuture.supplyAsync(() -> {
             var databaseContext = transaction.getDatabaseContext();
 
@@ -238,18 +220,19 @@ public class AuthModule implements ISocialModule, IAuthModule {
                 return CompletableFuture.completedStage(null);
             }
             else {
-                return bridge.getMinecraftPlatform().tryGetUser(uuid);
+                return getBridge().getMinecraftPlatform().tryGetUser(uuid);
             }
         });
     }
 
     @Override
-    public CompletableFuture<MinecraftUser> logoutUser(SocialUser socialUser) {
-        return bridge.queryDatabase(transaction -> logoutUser(socialUser, transaction));
+    public CompletableFuture<MinecraftUser> logoutUser(SocialUser socialUser, ITransaction transaction) {
+        return transaction == null
+            ? getBridge().doTransaction(transaction2 -> logoutUserInternal(socialUser, transaction2))
+            : logoutUserInternal(socialUser, transaction);
     }
 
-    @Override
-    public CompletableFuture<MinecraftUser> logoutUser(SocialUser socialUser, ITransaction transaction) {
+    private CompletableFuture<MinecraftUser> logoutUserInternal(SocialUser socialUser, ITransaction transaction) {
         return CompletableFuture.supplyAsync(() -> {
                 var databaseContext = transaction.getDatabaseContext();
 
@@ -284,7 +267,7 @@ public class AuthModule implements ISocialModule, IAuthModule {
                     return null;
                 }
             })
-            .thenCompose(minecraftId -> bridge.getMinecraftPlatform().tryGetUser(minecraftId))
+            .thenCompose(minecraftId -> getBridge().getMinecraftPlatform().tryGetUser(minecraftId))
             .thenCompose(minecraftUser -> {
                 if (minecraftUser != null) {
                     return events.logout
@@ -297,25 +280,27 @@ public class AuthModule implements ISocialModule, IAuthModule {
     }
 
     @Override
-    public CompletableFuture<Void> enumerateAssociations(Consumer<SocialUser> handler) {
-        return bridge.queryDatabase(transaction -> enumerateAssociations(handler, transaction));
+    public CompletableFuture<Void> enumerateAssociations(Consumer<SocialUser> handler, ITransaction transaction) {
+        return transaction == null
+            ? getBridge().doTransaction(transaction2 -> enumerateAssociationsInternal(handler, transaction2))
+            : enumerateAssociationsInternal(handler, transaction);
     }
 
-    @Override
-    public CompletableFuture<Void> enumerateAssociations(Consumer<SocialUser> handler, ITransaction transaction) {
-        return enumerateAssociations(socialUser -> {
+    private CompletableFuture<Void> enumerateAssociationsInternal(Consumer<SocialUser> handler, ITransaction transaction) {
+        return enumerateAssociationsInternal(socialUser -> {
             handler.accept(socialUser);
             return CompletableFuture.completedFuture(null);
         }, transaction);
     }
 
     @Override
-    public CompletableFuture<Void> enumerateAssociations(Function<SocialUser, CompletableFuture<Void>> handler) {
-        return bridge.queryDatabase(transaction -> enumerateAssociations(handler, transaction));
+    public CompletableFuture<Void> enumerateAssociations(Function<SocialUser, CompletableFuture<Void>> handler, ITransaction transaction) {
+        return transaction == null
+            ? getBridge().doTransaction(transaction2 -> enumerateAssociationsInternal(handler, transaction2))
+            : enumerateAssociationsInternal(handler, transaction);
     }
 
-    @Override
-    public CompletableFuture<Void> enumerateAssociations(Function<SocialUser, CompletableFuture<Void>> handler, ITransaction transaction) {
+    private CompletableFuture<Void> enumerateAssociationsInternal(Function<SocialUser, CompletableFuture<Void>> handler, ITransaction transaction) {
         var databaseContext = transaction.getDatabaseContext();
 
         try {
@@ -336,7 +321,7 @@ public class AuthModule implements ISocialModule, IAuthModule {
 
                     try (var cursor = query.iterator()) {
                         return iterateCursor(cursor, association -> {
-                            var platform = bridge.getSocialPlatform(association.getSocialPlatformId());
+                            var platform = getBridge().getSocialPlatform(association.getSocialPlatformId());
                             if (platform != null) {
                                 return platform
                                     .tryGetUser(new Identifier(type, association.getSocialUserId()), transaction)
@@ -386,10 +371,11 @@ public class AuthModule implements ISocialModule, IAuthModule {
 
     @Override
     public CompletableFuture<Boolean> enable(ISocialBridge bridge) {
+        super.enable(bridge);
+        
         logger = Logger.getLogger(bridge.getLogger().getName() + '.' + NAME);
-        this.bridge = bridge;
 
-        return bridge.queryDatabase(transaction -> {
+        return bridge.doTransaction(transaction -> {
             var databaseContext = transaction.getDatabaseContext();
 
             try {
@@ -433,42 +419,6 @@ public class AuthModule implements ISocialModule, IAuthModule {
             err.printStackTrace();
             return false;
         });
-    }
-
-    @Override
-    public CompletableFuture<Boolean> disable() {
-        this.bridge = null;
-        return CompletableFuture.completedFuture(true);
-    }
-
-    @Override
-    public ISocialBridge getBridge() {
-        return bridge;
-    }
-
-    @Override
-    public Version getCompabilityVersion() {
-        return SocialBridge_CompabilityVersion;
-    }
-
-    @Override
-    public List<ISocialCommand> getSocialCommands() {
-        return socialCommands;
-    }
-
-    @Override
-    public List<IMinecraftCommand> getMinecraftCommands() {
-        return minecraftCommands;
-    }
-
-    @Override
-    public List<ITranslationSource> getTranslations() {
-        return translationSources;
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
     }
 
     @SuppressWarnings("rawtypes")

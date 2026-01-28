@@ -4,7 +4,7 @@ import io.github.kosyakmakc.socialBridge.AuthSocial.AuthModule;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthMessageKey;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthPermissions;
 import io.github.kosyakmakc.socialBridge.Commands.MinecraftCommands.MinecraftCommandBase;
-import io.github.kosyakmakc.socialBridge.MinecraftPlatform.MinecraftUser;
+import io.github.kosyakmakc.socialBridge.Commands.MinecraftCommands.MinecraftCommandExecutionContext;
 import io.github.kosyakmakc.socialBridge.Utils.MessageKey;
 
 import java.util.HashMap;
@@ -21,13 +21,14 @@ public class StatusCommand extends MinecraftCommandBase {
     }
 
     @Override
-    public void execute(MinecraftUser minecraftUser, List<Object> list) {
+    public void execute(MinecraftCommandExecutionContext ctx, List<Object> list) {
+        var minecraftUser = ctx.getSender();
         var locale = minecraftUser.getLocale();
 
-        var getHeaderTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_HEADER);
-        var getRecordTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_RECORD);
-        var getEmptyTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_EMPTY);
-        var socialUsersTask = module.tryGetSocialUsers(minecraftUser.getId());
+        var getHeaderTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_HEADER, null);
+        var getRecordTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_RECORD, null);
+        var getEmptyTemplateTask = getBridge().getLocalizationService().getMessage(module, locale, AuthMessageKey.STATUS_COMMAND_EMPTY, null);
+        var socialUsersTask = module.tryGetSocialUsers(minecraftUser.getId(), null);
 
         CompletableFuture.allOf(new CompletableFuture[] {
             socialUsersTask,
@@ -53,7 +54,7 @@ public class StatusCommand extends MinecraftCommandBase {
                 }
             }
             catch (InterruptedException | ExecutionException err) {
-                getBridge().getLocalizationService().getMessage(module, locale, MessageKey.INTERNAL_SERVER_ERROR)
+                getBridge().getLocalizationService().getMessage(module, locale, MessageKey.INTERNAL_SERVER_ERROR, null)
                 .thenAccept(msgTemplate -> {
                     minecraftUser.sendMessage(msgTemplate, new HashMap<>());
                 });

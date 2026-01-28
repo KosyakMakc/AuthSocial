@@ -3,7 +3,7 @@ package io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands;
 import io.github.kosyakmakc.socialBridge.AuthSocial.AuthModule;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthMessageKey;
 import io.github.kosyakmakc.socialBridge.Commands.SocialCommands.SocialCommandBase;
-import io.github.kosyakmakc.socialBridge.SocialPlatforms.SocialUser;
+import io.github.kosyakmakc.socialBridge.Commands.SocialCommands.SocialCommandExecutionContext;
 
 import java.util.HashMap;
 import java.util.List;
@@ -17,8 +17,11 @@ public class LogoutLoginCommand extends SocialCommandBase {
     }
 
     @Override
-    public void execute(SocialUser sender, List<Object> args) {
+    public void execute(SocialCommandExecutionContext ctx, List<Object> args) {
         var logger = module.getLogger();
+
+        var sender = ctx.getSender();
+        var message = ctx.getSocialMessage();
 
         var platformName = sender.getPlatform().getPlatformName();
         var socialName = sender.getName();
@@ -28,31 +31,31 @@ public class LogoutLoginCommand extends SocialCommandBase {
         placeholders.put("social-name", socialName);
 
         module
-            .tryGetMinecraftUser(sender)
+            .tryGetMinecraftUser(sender, null)
             .thenCompose(player -> {
                 if (player == null) {
                     logger.info("social(" + sender.getName() + ") failed to logout - not authenticated.");
                     return getBridge()
-                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_FAILED)
-                        .thenCompose(msgTemplate -> sender.sendMessage(msgTemplate, placeholders));
+                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_FAILED, null)
+                        .thenCompose(msgTemplate -> message.sendReply(msgTemplate, placeholders));
                 }
                 var minecraftName = player.getName();
                 return module
-                    .logoutUser(sender)
+                    .logoutUser(sender, null)
                     .thenCompose(minecraftId -> {
                         if (minecraftId != null) {
                             placeholders.put("minecraft-name", minecraftName);
                             
                             logger.info("minecraft(" + minecraftName + ") is logout from " + platformName + " platform.");
                             return getBridge()
-                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_SUCCESS)
-                                .thenCompose(msgTemplate -> sender.sendMessage(msgTemplate, placeholders));
+                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_SUCCESS, null)
+                                .thenCompose(msgTemplate -> message.sendReply(msgTemplate, placeholders));
                         }
                         else {
                             logger.info("social(" + sender.getName() + ") failed to logout - not authenticated.");
                             return getBridge()
-                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_FAILED)
-                                .thenCompose(msgTemplate -> sender.sendMessage(msgTemplate, placeholders));
+                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_FAILED, null)
+                                .thenCompose(msgTemplate -> message.sendReply(msgTemplate, placeholders));
                         }
                     });
             });

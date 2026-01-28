@@ -6,7 +6,7 @@ import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthMessageKey;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.LoginState;
 import io.github.kosyakmakc.socialBridge.Commands.Arguments.CommandArgument;
 import io.github.kosyakmakc.socialBridge.Commands.SocialCommands.SocialCommandBase;
-import io.github.kosyakmakc.socialBridge.SocialPlatforms.SocialUser;
+import io.github.kosyakmakc.socialBridge.Commands.SocialCommands.SocialCommandExecutionContext;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Date;
@@ -28,14 +28,17 @@ public class CommitLoginCommand extends SocialCommandBase {
     }
 
     @Override
-    public void execute(SocialUser sender, List<Object> args) {
+    public void execute(SocialCommandExecutionContext ctx, List<Object> args) {
         var bridge = getBridge();
         var logger = module.getLogger();
+
+        var sender = ctx.getSender();
+        var message = ctx.getSocialMessage();
 
         var authCode = (int) args.getFirst();
         var placeholders = new HashMap<String, String>();
 
-        bridge.queryDatabase(transaction -> {
+        bridge.doTransaction(transaction -> {
             var databaseContext = transaction.getDatabaseContext();
 
             try {
@@ -67,7 +70,7 @@ public class CommitLoginCommand extends SocialCommandBase {
         })
         .thenCompose(minecraftId -> {
             if (minecraftId != null) {
-                return module.authorize(sender, minecraftId);
+                return module.authorize(sender, minecraftId, null);
             }
             else {
                 return CompletableFuture.completedFuture(LoginState.NotCommited);
@@ -80,26 +83,26 @@ public class CommitLoginCommand extends SocialCommandBase {
                     logger.info(sender.getName() + " success commited login to " + sender.getPlatform().getPlatformName() + " platform");
                     //mcPlayer.sendMessage(getBridge().getLocalizationService().getMessage(sender.getLocale(), AuthMessageKey.COMMITED_LOGIN), placeholders);
                     getBridge()
-                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.SOCIAL_COMMITED_LOGIN)
-                        .thenAccept(msgTemplate -> sender.sendMessage(msgTemplate, placeholders));
+                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.SOCIAL_COMMITED_LOGIN, null)
+                        .thenAccept(msgTemplate -> message.sendReply(msgTemplate, placeholders));
                 }
                 case NotCommited -> {
                     logger.info(sender.getName() + " failed to commit login");
                     getBridge()
-                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.COMMIT_LOGIN_FAILED)
-                        .thenAccept(msgTemplate -> sender.sendMessage(msgTemplate, placeholders));
+                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.COMMIT_LOGIN_FAILED, null)
+                        .thenAccept(msgTemplate -> message.sendReply(msgTemplate, placeholders));
                 }
                 case DuplicationError -> {
                     logger.info(sender.getName() + " duplicating his logins to " + sender.getPlatform().getPlatformName() + ", ignoring it...");
                     getBridge()
-                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.YOU_ARE_ALREADY_AUTHORIZED)
-                        .thenAccept(msgTemplate -> sender.sendMessage(msgTemplate, placeholders));
+                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.YOU_ARE_ALREADY_AUTHORIZED, null)
+                        .thenAccept(msgTemplate -> message.sendReply(msgTemplate, placeholders));
                 }
                 case NotSupportedPlatform -> {
                     logger.info(sender.getName() + " trying to commit on not supported platform " + sender.getPlatform().getPlatformName() + ", ignoring it...");
                     getBridge()
-                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.UNSUPPORTED_PLATFORM)
-                        .thenAccept(msgTemplate -> sender.sendMessage(msgTemplate, placeholders));
+                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.UNSUPPORTED_PLATFORM, null)
+                        .thenAccept(msgTemplate -> message.sendReply(msgTemplate, placeholders));
                 }
                 default -> throw new IllegalArgumentException("Unexpected value: " + loginState);
             }
