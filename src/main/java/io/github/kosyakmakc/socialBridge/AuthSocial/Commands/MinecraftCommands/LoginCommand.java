@@ -5,7 +5,7 @@ import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.Session;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthMessageKey;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthPermissions;
 import io.github.kosyakmakc.socialBridge.Commands.MinecraftCommands.MinecraftCommandBase;
-import io.github.kosyakmakc.socialBridge.MinecraftPlatform.MinecraftUser;
+import io.github.kosyakmakc.socialBridge.Commands.MinecraftCommands.MinecraftCommandExecutionContext;
 import io.github.kosyakmakc.socialBridge.Utils.MessageKey;
 
 import java.sql.SQLException;
@@ -27,16 +27,17 @@ public class LoginCommand extends MinecraftCommandBase {
     }
 
     @Override
-    public void execute(MinecraftUser sender, List<Object> args) {
+    public void execute(MinecraftCommandExecutionContext ctx, List<Object> args) {
         var bridge = getBridge();
         var logger = module.getLogger();
+        var sender = ctx.getSender();
 
         var code = random.nextInt(100_000, 1_000_000);
         var placeholders = new HashMap<String, String>();
         placeholders.put("placeholder-code", Integer.toString(code));
 
         var sessionDbRecord = new Session(sender.getId(), code, Duration.ofMinutes(10));
-        bridge.queryDatabase(transaction -> {
+        bridge.doTransaction(transaction -> {
             var databaseContext = transaction.getDatabaseContext();
 
             try {
@@ -51,14 +52,14 @@ public class LoginCommand extends MinecraftCommandBase {
             if(isSuccess) {
                 logger.info(sender.getName() + " start login session");
                 return getBridge()
-                    .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGIN_FROM_MINECRAFT)
+                    .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGIN_FROM_MINECRAFT, null)
                     .thenAccept(msgTemplate -> {
                         sender.sendMessage(msgTemplate, placeholders);
                     });
             }
             else {
                 return getBridge()
-                    .getLocalizationService().getMessage(module, sender.getLocale(), MessageKey.INTERNAL_SERVER_ERROR)
+                    .getLocalizationService().getMessage(module, sender.getLocale(), MessageKey.INTERNAL_SERVER_ERROR, null)
                     .thenAccept(msgTemplate -> {
                         sender.sendMessage(msgTemplate, new HashMap<>());
                     });

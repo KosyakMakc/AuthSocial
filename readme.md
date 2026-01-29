@@ -32,7 +32,7 @@ repositories {
     }
 }
 dependencies {
-    compileOnly "io.github.kosyakmakc:AuthSocial:0.8.+"
+    compileOnly "io.github.kosyakmakc:AuthSocial:0.9.+"
 }
 ```
 
