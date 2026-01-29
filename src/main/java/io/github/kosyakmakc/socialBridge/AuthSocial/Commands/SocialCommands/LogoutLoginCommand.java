@@ -28,7 +28,7 @@ public class LogoutLoginCommand extends SocialCommandBase {
 
         var placeholders = new HashMap<String, String>();
         placeholders.put("social-platform-name", sender.getPlatform().getPlatformName());
-        placeholders.put("social-name", socialName);
+        placeholders.put("social-user-name", socialName);
 
         module
             .tryGetMinecraftUser(sender, null)
@@ -44,9 +44,14 @@ public class LogoutLoginCommand extends SocialCommandBase {
                     .logoutUser(sender, null)
                     .thenCompose(minecraftId -> {
                         if (minecraftId != null) {
-                            placeholders.put("minecraft-name", minecraftName);
+                            placeholders.put("minecraft-user-name", minecraftName);
                             
                             logger.info("minecraft(" + minecraftName + ") is logout from " + platformName + " platform.");
+
+                            getBridge()
+                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_SUCCESS_MINECRAFT, null)
+                                .thenAccept(msgTemplate -> player.sendMessage(msgTemplate, placeholders));
+
                             return getBridge()
                                 .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_SUCCESS, null)
                                 .thenCompose(msgTemplate -> message.sendReply(msgTemplate, placeholders));

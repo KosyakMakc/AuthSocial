@@ -21,5 +21,6 @@ public class AuthMessageKey {
 
     public static final MessageKey LOGOUT_DESCRIPTION = new MessageKey("logout_description");
     public static final MessageKey LOGOUT_SUCCESS = new MessageKey("logout_success");
+    public static final MessageKey LOGOUT_SUCCESS_MINECRAFT = new MessageKey("logout_success_minecraft");
     public static final MessageKey LOGOUT_FAILED = new MessageKey("logout_failed");
 }

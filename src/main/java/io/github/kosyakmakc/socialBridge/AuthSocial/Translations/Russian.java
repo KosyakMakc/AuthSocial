@@ -17,11 +17,11 @@ public class Russian implements ITranslationSource {
         return List.of(
                 new LocalizationRecord(AuthMessageKey.LOGIN_FROM_MINECRAFT_DESCRIPTION.key(), "Начать новую сессию авторизации и сгенерировать случайный 6-значный код."),
                 new LocalizationRecord(AuthMessageKey.LOGIN_FROM_MINECRAFT.key(), "Ваш код для авторизации - <placeholder-code>. Пожалуйста продолжите операцию в социальной сети."),
-                //new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN.key(), "Вы <dark_green>успешно</dark_green> подключены к социальной сети <social-platform-name>."),
+                new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN.key(), "Вы были <dark_green>успешно</dark_green> подключены к аккаунту <gold><social-user-name></gold> социальной сети <aqua><social-platform-name></aqua>."),
 
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_DESCRIPTION.key(), "Получить список подключенных социальных сетей."),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_HEADER.key(), "Вы имеете активные сессии в:"),
-                new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_RECORD.key(), "- <social-platform-name>(<social-user-name>)"),
+                new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_RECORD.key(), "- <aqua><social-platform-name></aqua>(<gold><social-user-name></gold>)"),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_EMPTY.key(), "Нет активных сессий."),
 
                 new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN_DESCRIPTION.key(), "Подключить ваш аккаунт к игровому профилю Minecraft. Пожалуйста также укажите 6-значный код авторизации."),
@@ -31,8 +31,9 @@ public class Russian implements ITranslationSource {
                 new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_FAILED.key(), "Неудалось подтвердить авторизацию с этим кодом."),
 
                 new LocalizationRecord(AuthMessageKey.LOGOUT_DESCRIPTION.key(), "Отключить текущий социальный аккаунт от игрового профиля."),
-                new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS.key(), "Вы(<social-name>) были успешно отключены от игрового профиля(<minecraft-name>) на этой социальной платформе."), // also available <social-platform-name>
-                new LocalizationRecord(AuthMessageKey.LOGOUT_FAILED.key(), "Вы(<social-name>) не можете отключить игровой профиль - отсутствует авторизация.") // also available <social-platform-name>
+                new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS.key(), "Вы(<social-user-name>) были успешно отключены от игрового профиля(<minecraft-user-name>) на этой социальной платформе."), // also available <social-platform-name>
+                new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS_MINECRAFT.key(), "От вашего игрового профиля был отключен аккаунт <gold><social-user-name></gold> социальной сети <aqua><social-platform-name></aqua>."), // also available <social-platform-name>
+                new LocalizationRecord(AuthMessageKey.LOGOUT_FAILED.key(), "Вы(<social-user-name>) не можете отключить игровой профиль - отсутствует авторизация.") // also available <social-platform-name>
         );
     }
 }

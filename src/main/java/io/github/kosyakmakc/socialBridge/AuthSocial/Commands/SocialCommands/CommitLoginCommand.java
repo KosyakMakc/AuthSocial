@@ -78,13 +78,23 @@ public class CommitLoginCommand extends SocialCommandBase {
         })
         .thenAccept(loginState -> {
             placeholders.put("social-platform-name", sender.getPlatform().getPlatformName());
+            placeholders.put("social-user-name", sender.getName());
             switch (loginState) {
                 case Commited -> {
                     logger.info(sender.getName() + " success commited login to " + sender.getPlatform().getPlatformName() + " platform");
-                    //mcPlayer.sendMessage(getBridge().getLocalizationService().getMessage(sender.getLocale(), AuthMessageKey.COMMITED_LOGIN), placeholders);
-                    getBridge()
-                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.SOCIAL_COMMITED_LOGIN, null)
-                        .thenAccept(msgTemplate -> message.sendReply(msgTemplate, placeholders));
+
+                    module
+                        .tryGetMinecraftUser(sender, null)
+                        .thenAccept(minecraftUser -> {
+                            getBridge()
+                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.COMMITED_LOGIN, null)
+                                .thenAccept(msgTemplate -> minecraftUser.sendMessage(msgTemplate, placeholders));
+        
+                            getBridge()
+                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.SOCIAL_COMMITED_LOGIN, null)
+                                .thenAccept(msgTemplate -> message.sendReply(msgTemplate, placeholders));
+                        });
+                    
                 }
                 case NotCommited -> {
                     logger.info(sender.getName() + " failed to commit login");
