@@ -33,7 +33,7 @@ public class English implements ITranslationSource {
 
             new LocalizationRecord(AuthMessageKey.LOGOUT_DESCRIPTION.key(), "Disconnect current social platform from your minecraft account."),
             new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS.key(), "You(<social-user-name>) are successfully logout from profile(<minecraft-user-name>) on this platform."), // also available <social-platform-name>
-            new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS_MINECRAFT.key(), "Your <aqua><social-platform-name></aqua> social account <orange><social-user-name></orange> has been disconnected from your gaming profile."),
+            new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS_MINECRAFT.key(), "Your <aqua><social-platform-name></aqua> social account <gold><social-user-name></gold> has been disconnected from your gaming profile."),
             new LocalizationRecord(AuthMessageKey.LOGOUT_FAILED.key(), "You(<social-user-name>) unable to logout - not authenticated.") // also available <social-platform-name>
         );
     }
