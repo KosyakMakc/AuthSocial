@@ -31,10 +31,24 @@ public class English implements ITranslationSource {
             new LocalizationRecord(AuthMessageKey.YOU_ARE_ALREADY_AUTHORIZED.key(), "You are already authorized on this platform."),
             new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_FAILED.key(), "Unable confirm authorization with this code."),
 
+            new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_DESCRIPTION.key(), "Disconnect social platform from your Minecraft account."),
+            new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_NOT_FOUND_PLATFORM.key(), "<red>Not found social platform with this name."),
+            new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_NOT_FOUND_SOCIAL_USER.key(), "<red>Отсутствует связь вашего Minecraft аккаунта с социальной сетью <aqua><social-platform-name></aqua>."),
+            new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_FAILED.key(), "<red>Unable to disconnect social platform from your Minecraft account, please try again later or contact with administrator."),
+            new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_SUCCESS.key(), "<dark_green>success disconnecting social platform <aqua><social-platform-name></aqua>."),
+
+            new LocalizationRecord(AuthMessageKey.SOCIAL_USER_INFO_COMMAND_DESCRIPTION.key(), "Check Minecraft nickname."),
+            new LocalizationRecord(AuthMessageKey.SOCIAL_USER_INFO_COMMAND_NO_REPLY.key(), "You forget about reply message of user, which nickname you want to check."),
+            new LocalizationRecord(AuthMessageKey.SOCIAL_USER_INFO_COMMAND_NOT_FOUND.key(), "This user doesn't have linked Minecraft account."),
+            new LocalizationRecord(AuthMessageKey.SOCIAL_USER_INFO_COMMAND_SUCCESS.key(), "Minecraft nick: <reply-minecraft-user-name>."),
+
             new LocalizationRecord(AuthMessageKey.LOGOUT_DESCRIPTION.key(), "Disconnect current social platform from your minecraft account."),
             new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS.key(), "You(<social-user-name>) are successfully logout from profile(<minecraft-user-name>) on this platform."), // also available <social-platform-name>
             new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS_MINECRAFT.key(), "Your <aqua><social-platform-name></aqua> social account <gold><social-user-name></gold> has been disconnected from your gaming profile."),
-            new LocalizationRecord(AuthMessageKey.LOGOUT_FAILED.key(), "You(<social-user-name>) unable to logout - not authenticated.") // also available <social-platform-name>
+            new LocalizationRecord(AuthMessageKey.LOGOUT_FAILED.key(), "You(<social-user-name>) unable to logout - not authenticated."), // also available <social-platform-name>
+
+                new LocalizationRecord(AuthMessageKey.AUTHSOCIAL_BASE_COMMAND_NO_LOGIN.key(), "Unable to execute command, you are not authorized."),
+                new LocalizationRecord(AuthMessageKey.AUTHSOCIAL_BASE_COMMAND_NO_PERMISSION.key(), "Unable to execute command, no permissions.")
         );
     }
 }

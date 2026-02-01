@@ -28,12 +28,26 @@ public class Russian implements ITranslationSource {
                 new LocalizationRecord(AuthMessageKey.UNSUPPORTED_PLATFORM.key(), "К сожалению эта платформа не поддерживается ботом."),
                 new LocalizationRecord(AuthMessageKey.SOCIAL_COMMITED_LOGIN.key(), "Вы были успешно подключены к игровому профилю."),
                 new LocalizationRecord(AuthMessageKey.YOU_ARE_ALREADY_AUTHORIZED.key(), "Вы уже авторизованы."),
-                new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_FAILED.key(), "Неудалось подтвердить авторизацию с этим кодом."),
+                new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_FAILED.key(), "Не удалось подтвердить авторизацию с этим кодом."),
+
+                new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_DESCRIPTION.key(), "Отключить социальную сеть от вашего Minecraft аккаунта."),
+                new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_NOT_FOUND_PLATFORM.key(), "<red>Неизвестная социальная сеть."),
+                new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_NOT_FOUND_SOCIAL_USER.key(), "<red>Отсутствует связь вашего Minecraft аккаунта с социальной сетью <aqua><social-platform-name></aqua>."),
+                new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_FAILED.key(), "<red>Не удалось отключить социальную сеть от вашего Minecraft аккаунта, попробуйте позже или свяжитесь с администрацией."),
+                new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_SUCCESS.key(), "<dark_green>Успешно отключена социальная сеть <aqua><social-platform-name></aqua>."),
+
+                new LocalizationRecord(AuthMessageKey.SOCIAL_USER_INFO_COMMAND_DESCRIPTION.key(), "Узнать игровой ник."),
+                new LocalizationRecord(AuthMessageKey.SOCIAL_USER_INFO_COMMAND_NO_REPLY.key(), "Вы забыли выделить сообщение пользователя, ник которого вы хотите узнать."),
+                new LocalizationRecord(AuthMessageKey.SOCIAL_USER_INFO_COMMAND_NOT_FOUND.key(), "У этого пользователя нет связанного Minecraft аккаунта."),
+                new LocalizationRecord(AuthMessageKey.SOCIAL_USER_INFO_COMMAND_SUCCESS.key(), "Игровой ник: <reply-minecraft-user-name>."),
 
                 new LocalizationRecord(AuthMessageKey.LOGOUT_DESCRIPTION.key(), "Отключить текущий социальный аккаунт от игрового профиля."),
                 new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS.key(), "Вы(<social-user-name>) были успешно отключены от игрового профиля(<minecraft-user-name>) на этой социальной платформе."), // also available <social-platform-name>
                 new LocalizationRecord(AuthMessageKey.LOGOUT_SUCCESS_MINECRAFT.key(), "От вашего игрового профиля был отключен аккаунт <gold><social-user-name></gold> социальной сети <aqua><social-platform-name></aqua>."), // also available <social-platform-name>
-                new LocalizationRecord(AuthMessageKey.LOGOUT_FAILED.key(), "Вы(<social-user-name>) не можете отключить игровой профиль - отсутствует авторизация.") // also available <social-platform-name>
-        );
+                new LocalizationRecord(AuthMessageKey.LOGOUT_FAILED.key(), "Вы(<social-user-name>) не можете отключить игровой профиль - отсутствует авторизация."), // also available <social-platform-name>
+
+                new LocalizationRecord(AuthMessageKey.AUTHSOCIAL_BASE_COMMAND_NO_LOGIN.key(), "Не удалось выполнить команду, вы не авторизованы."),
+                new LocalizationRecord(AuthMessageKey.AUTHSOCIAL_BASE_COMMAND_NO_PERMISSION.key(), "Не удалось выполнить команду, недостаточно прав.")
+            );
     }
 }
