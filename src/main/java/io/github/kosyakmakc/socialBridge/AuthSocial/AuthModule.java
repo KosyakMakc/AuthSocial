@@ -6,6 +6,7 @@ import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands.L
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands.StatusCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands.CommitLoginCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands.LogoutLoginCommand;
+import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands.SocialUserInfoCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.Association;
 import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.AssociationByUUID;
 import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.AssociationByInteger;
@@ -51,9 +52,11 @@ public class AuthModule extends SocialModule implements IAuthModule {
 
         addMinecraftCommand(new LoginCommand(this));
         addMinecraftCommand(new StatusCommand(this));
+        //addMinecraftCommand(new LogoutSpecificSocialPlatformCommand(this));
 
         addSocialCommand(new CommitLoginCommand(this));
         addSocialCommand(new LogoutLoginCommand(this));
+        addSocialCommand(new SocialUserInfoCommand(this));
 
         addTranslationSource(new English());
         addTranslationSource(new Russian());
