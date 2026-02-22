@@ -9,17 +9,19 @@
 
 ### Commands for minecraft:
 
-| Command literal    | Permission node   | Description                                                              |
-|--------------------|-------------------|--------------------------------------------------------------------------|
-| /authsocial login        | AuthSocial.login  | Creates a short-life session for auth with 6-digit code                  |
-| /authsocial status       | AuthSocial.status | Provide information about all connected social platform for user(sender) |
+| Command literal                  | Permission node   | Description                                                              |
+|----------------------------------|-------------------|--------------------------------------------------------------------------|
+| /authsocial login                | AuthSocial.login  | Creates a short-life session for auth with 6-digit code                  |
+| /authsocial status               | AuthSocial.status | Provide information about all connected social platform for user(sender) |
+| /authsocial logout {social-name} | AuthSocial.logout | Drop authorize with specific social platform from database               |
 
 ### Commands for social platforms:
 
-| Command literal             | Description                                                                                      |
-|-----------------------------|--------------------------------------------------------------------------------------------------|
-| /authsocial_login   auth-code     | Authorize social user with minecraft player using AUTH_CODE, authorize will be saved to database |
-| /authsocial_logout                | Drop authorize with minecraft player from database                                               |
+| Command literal                 | Permission node          | Description                                                                                      |
+|---------------------------------|--------------------------|--------------------------------------------------------------------------------------------------|
+| /authsocial_login auth-code     | -                        | Authorize social user with minecraft player using AUTH_CODE, authorize will be saved to database |
+| /authsocial_logout              | -                        | Drop authorize with minecraft player from database                                               |
+| /authsocial_info [replyMessage] | AuthSocial.checkUserInfo | Show Minecraft nickname if exist of replied social user                                          |
 
 ## API for developers
 
