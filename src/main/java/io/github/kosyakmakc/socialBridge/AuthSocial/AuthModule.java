@@ -3,6 +3,7 @@ package io.github.kosyakmakc.socialBridge.AuthSocial;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.table.TableUtils;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands.LoginCommand;
+import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands.LogoutSpecificSocialPlatformCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands.StatusCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands.CommitLoginCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands.LogoutLoginCommand;
@@ -52,7 +53,7 @@ public class AuthModule extends SocialModule implements IAuthModule {
 
         addMinecraftCommand(new LoginCommand(this));
         addMinecraftCommand(new StatusCommand(this));
-        //addMinecraftCommand(new LogoutSpecificSocialPlatformCommand(this));
+        addMinecraftCommand(new LogoutSpecificSocialPlatformCommand(this));
 
         addSocialCommand(new CommitLoginCommand(this));
         addSocialCommand(new LogoutLoginCommand(this));
