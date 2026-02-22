@@ -3,9 +3,11 @@ package io.github.kosyakmakc.socialBridge.AuthSocial;
 import com.j256.ormlite.dao.Dao;
 import com.j256.ormlite.table.TableUtils;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands.LoginCommand;
+import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands.LogoutSpecificSocialPlatformCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.MinecraftCommands.StatusCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands.CommitLoginCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands.LogoutLoginCommand;
+import io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands.SocialUserInfoCommand;
 import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.Association;
 import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.AssociationByUUID;
 import io.github.kosyakmakc.socialBridge.AuthSocial.DatabaseTables.AssociationByInteger;
@@ -40,20 +42,22 @@ import java.util.logging.Logger;
 
 public class AuthModule extends SocialModule implements IAuthModule {
     public static final UUID ID = UUID.fromString("11752e9b-8968-42ca-8513-6ce3e52a27b4");
-    public static final Version SocialBridge_CompabilityVersion = new Version("0.9.1");
+    public static final Version SocialBridge_CompabilityVersion = new Version("0.10.1");
     public static final String NAME = "authsocial";
     private Logger logger;
 
     public final AuthEvents events = new AuthEvents();
 
-    public AuthModule(IModuleLoader loader) {
-        super(loader, SocialBridge_CompabilityVersion, ID, NAME);
+    public AuthModule(IModuleLoader loader, Version version) {
+        super(loader, SocialBridge_CompabilityVersion, version, ID, NAME);
 
         addMinecraftCommand(new LoginCommand(this));
         addMinecraftCommand(new StatusCommand(this));
+        addMinecraftCommand(new LogoutSpecificSocialPlatformCommand(this));
 
         addSocialCommand(new CommitLoginCommand(this));
         addSocialCommand(new LogoutLoginCommand(this));
+        addSocialCommand(new SocialUserInfoCommand(this));
 
         addTranslationSource(new English());
         addTranslationSource(new Russian());
