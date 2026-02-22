@@ -18,17 +18,17 @@ public class English implements ITranslationSource {
         return List.of(
             new LocalizationRecord(AuthMessageKey.LOGIN_FROM_MINECRAFT_DESCRIPTION.key(), "Start new auth session and generate random 6-digit code."),
             new LocalizationRecord(AuthMessageKey.LOGIN_FROM_MINECRAFT.key(), "Your authorization code - <placeholder-code>. Please continue operation in social platform."),
-            new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN.key(), "You are <dark_green>successfully</dark_green> connected with account <gold><social-user-name></gold> of social <aqua><social-platform-name></aqua> platform."),
+            new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_MINECRAFT_SUCCESS.key(), "You are <dark_green>successfully</dark_green> connected with account <gold><social-user-name></gold> of social <aqua><social-platform-name></aqua> platform."),
 
             new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_DESCRIPTION.key(), "Get list of connected yours social platforms."),
             new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_HEADER.key(), "You have active social sessions in:"),
             new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_RECORD.key(), "- <aqua><social-platform-name></aqua>(<gold><social-user-name></gold>)"),
             new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_EMPTY.key(), "No any active session."),
 
-            new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN_DESCRIPTION.key(), "Connect your social account with minecraft. Please provide also 6-digit auth code."),
+            new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_DESCRIPTION.key(), "Connect your social account with minecraft. Please provide also 6-digit auth code."),
             new LocalizationRecord(AuthMessageKey.UNSUPPORTED_PLATFORM.key(), "Sorry, but this platform is unsupported."),
-            new LocalizationRecord(AuthMessageKey.SOCIAL_COMMITED_LOGIN.key(), "You are successfully connected."),
-            new LocalizationRecord(AuthMessageKey.YOU_ARE_ALREADY_AUTHORIZED.key(), "You are already authorized on this platform."),
+            new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_SOCIAL_SUCCESS.key(), "You are successfully connected."),
+            new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_ALREADY_LOGGED.key(), "You are already authorized on this platform."),
             new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_FAILED.key(), "Unable confirm authorization with this code."),
 
             new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_DESCRIPTION.key(), "Disconnect social platform from your Minecraft account."),

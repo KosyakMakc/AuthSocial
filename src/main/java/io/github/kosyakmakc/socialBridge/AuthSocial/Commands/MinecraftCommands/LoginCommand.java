@@ -51,18 +51,10 @@ public class LoginCommand extends MinecraftCommandBase {
         .thenCompose(isSuccess -> {
             if(isSuccess) {
                 logger.info(sender.getName() + " start login session");
-                return getBridge()
-                    .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGIN_FROM_MINECRAFT, null)
-                    .thenAccept(msgTemplate -> {
-                        sender.sendMessage(msgTemplate, placeholders);
-                    });
+                return sender.sendMessage(AuthMessageKey.LOGIN_FROM_MINECRAFT, sender.getLocale(), placeholders, null);
             }
             else {
-                return getBridge()
-                    .getLocalizationService().getMessage(module, sender.getLocale(), MessageKey.INTERNAL_SERVER_ERROR, null)
-                    .thenAccept(msgTemplate -> {
-                        sender.sendMessage(msgTemplate, new HashMap<>());
-                    });
+                return sender.sendMessage(MessageKey.INTERNAL_SERVER_ERROR, sender.getLocale(), placeholders, null);
             }
         });
 

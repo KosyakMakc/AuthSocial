@@ -3,6 +3,7 @@ package io.github.kosyakmakc.socialBridge.AuthSocial.Commands.SocialCommands;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import io.github.kosyakmakc.socialBridge.AuthSocial.AuthModule;
 import io.github.kosyakmakc.socialBridge.AuthSocial.Utils.AuthMessageKey;
@@ -10,6 +11,7 @@ import io.github.kosyakmakc.socialBridge.Commands.Arguments.CommandArgument;
 import io.github.kosyakmakc.socialBridge.Commands.SocialCommands.SocialCommandBase;
 import io.github.kosyakmakc.socialBridge.Commands.SocialCommands.SocialCommandExecutionContext;
 import io.github.kosyakmakc.socialBridge.MinecraftPlatform.MinecraftUser;
+import io.github.kosyakmakc.socialBridge.SocialPlatforms.SocialUser;
 import io.github.kosyakmakc.socialBridge.Utils.MessageKey;
 import io.github.kosyakmakc.socialBridge.Utils.Permissions;
 
@@ -38,31 +40,31 @@ public abstract class AuthSocialBaseCommand extends SocialCommandBase {
    public abstract void execute (SocialCommandExecutionContext ctx, MinecraftUser minecraftPlayer, List<Object> args);
 
     @Override
-    public void execute(SocialCommandExecutionContext ctx, List<Object> args) {
+    public void execute(SocialCommandExecutionContext context, List<Object> args) {
         var placeholders = new HashMap<String, String>();
         var module = getBridge().getModule(AuthModule.class);
-        var socialUser = ctx.getSender();
-
-        module
-            .tryGetMinecraftUser(socialUser, null)
+        AtomicReference<SocialUser> senderReference = new AtomicReference<>();
+        var message = context.getSocialMessage();
+        
+        context
+            .getSender()
+            .thenCompose(socialUser -> {
+                senderReference.set(socialUser);
+                return module.tryGetMinecraftUser(socialUser, null);
+            })
             .thenAccept(minecraftUser -> {
                 if (minecraftUser == null) {
-                    getBridge()
-                        .getLocalizationService()
-                        .getMessage(module, ctx.getSender().getLocale(), AuthMessageKey.AUTHSOCIAL_BASE_COMMAND_NO_LOGIN, null)
-                        .thenAccept(msgTemplate -> ctx.getSender().sendMessage(msgTemplate, placeholders));
+                    message.sendReply(AuthMessageKey.AUTHSOCIAL_BASE_COMMAND_NO_LOGIN, senderReference.get().getLocale(), placeholders, null);
                 }
                 minecraftUser
                     .hasPermission(permission)
                     .thenAccept(isHavePermission -> {
                         if (!isHavePermission) {
-                            getBridge()
-                                .getLocalizationService()
-                                .getMessage(module, ctx.getSender().getLocale(), AuthMessageKey.AUTHSOCIAL_BASE_COMMAND_NO_PERMISSION, null)
-                                .thenAccept(msgTemplate -> ctx.getSender().sendMessage(msgTemplate, placeholders));
+                            message.sendReply(AuthMessageKey.AUTHSOCIAL_BASE_COMMAND_NO_PERMISSION, senderReference.get().getLocale(), placeholders, null);
+                            return;
                         }
 
-                        execute(ctx, minecraftUser, args);
+                        execute(context, minecraftUser, args);
                     });
             });
     }

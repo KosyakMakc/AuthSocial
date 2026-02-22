@@ -17,17 +17,17 @@ public class Russian implements ITranslationSource {
         return List.of(
                 new LocalizationRecord(AuthMessageKey.LOGIN_FROM_MINECRAFT_DESCRIPTION.key(), "Начать новую сессию авторизации и сгенерировать случайный 6-значный код."),
                 new LocalizationRecord(AuthMessageKey.LOGIN_FROM_MINECRAFT.key(), "Ваш код для авторизации - <placeholder-code>. Пожалуйста продолжите операцию в социальной сети."),
-                new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN.key(), "Вы были <dark_green>успешно</dark_green> подключены к аккаунту <gold><social-user-name></gold> социальной сети <aqua><social-platform-name></aqua>."),
-
+                
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_DESCRIPTION.key(), "Получить список подключенных социальных сетей."),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_HEADER.key(), "Вы имеете активные сессии в:"),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_RECORD.key(), "- <aqua><social-platform-name></aqua>(<gold><social-user-name></gold>)"),
                 new LocalizationRecord(AuthMessageKey.STATUS_COMMAND_EMPTY.key(), "Нет активных сессий."),
-
-                new LocalizationRecord(AuthMessageKey.COMMITED_LOGIN_DESCRIPTION.key(), "Подключить ваш аккаунт к игровому профилю Minecraft. Пожалуйста также укажите 6-значный код авторизации."),
+                
+                new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_DESCRIPTION.key(), "Подключить аккаунт к Minecraft c 6-значным кодом."),
                 new LocalizationRecord(AuthMessageKey.UNSUPPORTED_PLATFORM.key(), "К сожалению эта платформа не поддерживается ботом."),
-                new LocalizationRecord(AuthMessageKey.SOCIAL_COMMITED_LOGIN.key(), "Вы были успешно подключены к игровому профилю."),
-                new LocalizationRecord(AuthMessageKey.YOU_ARE_ALREADY_AUTHORIZED.key(), "Вы уже авторизованы."),
+                new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_MINECRAFT_SUCCESS.key(), "Вы были <dark_green>успешно</dark_green> подключены к аккаунту <gold><social-user-name></gold> социальной сети <aqua><social-platform-name></aqua>."),
+                new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_SOCIAL_SUCCESS.key(), "Вы были успешно подключены к игровому профилю."),
+                new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_ALREADY_LOGGED.key(), "Вы уже авторизованы."),
                 new LocalizationRecord(AuthMessageKey.COMMIT_LOGIN_FAILED.key(), "Не удалось подтвердить авторизацию с этим кодом."),
 
                 new LocalizationRecord(AuthMessageKey.LOGOUT_SPECIFIC_SOCIAL_PLATFORM_COMMAND_DESCRIPTION.key(), "Отключить социальную сеть от вашего Minecraft аккаунта."),

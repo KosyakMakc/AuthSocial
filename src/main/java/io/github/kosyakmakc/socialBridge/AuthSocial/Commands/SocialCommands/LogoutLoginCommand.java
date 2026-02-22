@@ -17,51 +17,46 @@ public class LogoutLoginCommand extends SocialCommandBase {
     }
 
     @Override
-    public void execute(SocialCommandExecutionContext ctx, List<Object> args) {
+    public void execute(SocialCommandExecutionContext context, List<Object> args) {
         var logger = module.getLogger();
 
-        var sender = ctx.getSender();
-        var message = ctx.getSocialMessage();
+        var message = context.getSocialMessage();
 
-        var platformName = sender.getPlatform().getPlatformName();
-        var socialName = sender.getName();
+        context
+            .getSender()
+            .thenCompose(sender -> {
+                var platformName = sender.getPlatform().getPlatformName();
+                var socialName = sender.getName();
 
-        var placeholders = new HashMap<String, String>();
-        placeholders.put("social-platform-name", sender.getPlatform().getPlatformName());
-        placeholders.put("social-user-name", socialName);
+                var placeholders = new HashMap<String, String>();
+                placeholders.put("social-platform-name", sender.getPlatform().getPlatformName());
+                placeholders.put("social-user-name", socialName);
 
-        module
-            .tryGetMinecraftUser(sender, null)
-            .thenCompose(player -> {
-                if (player == null) {
-                    logger.info("social(" + sender.getName() + ") failed to logout - not authenticated.");
-                    return getBridge()
-                        .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_FAILED, null)
-                        .thenCompose(msgTemplate -> message.sendReply(msgTemplate, placeholders));
-                }
-                var minecraftName = player.getName();
                 return module
-                    .logoutUser(sender, null)
-                    .thenCompose(minecraftId -> {
-                        if (minecraftId != null) {
-                            placeholders.put("minecraft-user-name", minecraftName);
-                            
-                            logger.info("minecraft(" + minecraftName + ") is logout from " + platformName + " platform.");
-
-                            getBridge()
-                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_SUCCESS_MINECRAFT, null)
-                                .thenAccept(msgTemplate -> player.sendMessage(msgTemplate, placeholders));
-
-                            return getBridge()
-                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_SUCCESS, null)
-                                .thenCompose(msgTemplate -> message.sendReply(msgTemplate, placeholders));
-                        }
-                        else {
+                    .tryGetMinecraftUser(sender, null)
+                    .thenCompose(player -> {
+                        if (player == null) {
                             logger.info("social(" + sender.getName() + ") failed to logout - not authenticated.");
-                            return getBridge()
-                                .getLocalizationService().getMessage(module, sender.getLocale(), AuthMessageKey.LOGOUT_FAILED, null)
-                                .thenCompose(msgTemplate -> message.sendReply(msgTemplate, placeholders));
+                            return message.sendReply(AuthMessageKey.LOGOUT_FAILED, sender.getLocale(), placeholders, null);
                         }
+                        var minecraftName = player.getName();
+                        return module
+                            .logoutUser(sender, null)
+                            .thenCompose(minecraftId -> {
+                                if (minecraftId != null) {
+                                    placeholders.put("minecraft-user-name", minecraftName);
+                                    
+                                    logger.info("minecraft(" + minecraftName + ") is logout from " + platformName + " platform.");
+                                    
+                                    player.sendMessage(AuthMessageKey.LOGOUT_SUCCESS_MINECRAFT, sender.getLocale(), placeholders, null);
+                                    
+                                    return message.sendReply(AuthMessageKey.LOGOUT_SUCCESS, sender.getLocale(), placeholders, null);
+                                }
+                                else {
+                                    logger.info("social(" + sender.getName() + ") failed to logout - not authenticated.");
+                                    return message.sendReply(AuthMessageKey.LOGOUT_FAILED, sender.getLocale(), placeholders, null);
+                                }
+                            });
                     });
             });
     }
