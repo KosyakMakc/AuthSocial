@@ -47,7 +47,7 @@ public class LogoutSpecificSocialPlatformCommand extends MinecraftCommandBase {
             return;
         }
 
-        placeholders.put("social-platform-name", ctx.getSender().getName());
+        placeholders.put("social-platform-name", socialPlatform.getPlatformName());
 
         module
             .tryGetSocialUsers(ctx.getSender().getId(), null)
